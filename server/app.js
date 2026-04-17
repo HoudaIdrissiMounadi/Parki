@@ -11,6 +11,7 @@ import bookingRoutes from './routes/bookingRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import cameraRoutes from './routes/cameraRoutes.js';
 import { stripeWebhook } from './controllers/paymentController.js';
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/camera', cameraRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Parki API is running...' });

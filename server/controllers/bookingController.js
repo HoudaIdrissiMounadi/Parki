@@ -3,7 +3,7 @@ import Parking from '../models/Parking.js';
 import sendEmail from '../utils/email.js';
 
 export const createBooking = async (req, res) => {
-  const { parkingId, startTime, endTime } = req.body;
+  const { parkingId, startTime, endTime, plateNumber } = req.body;
   const parking = await Parking.findById(parkingId);
   if (!parking) {
     res.status(404);
@@ -23,12 +23,12 @@ export const createBooking = async (req, res) => {
   const booking = await Booking.create({
     user: req.user._id,
     parking: parkingId,
+    plateNumber,
     startTime,
     endTime,
     totalPrice,
   });
 
-  // Notify user about pending booking
   try {
     await sendEmail({
       email: req.user.email,
@@ -44,6 +44,19 @@ export const createBooking = async (req, res) => {
 
 export const getMyBookings = async (req, res) => {
   const bookings = await Booking.find({ user: req.user._id }).populate('parking').sort('-createdAt');
+  res.json({ success: true, data: bookings });
+};
+
+// @desc    Get bookings for owner's parkings
+// @route   GET /api/bookings/owner
+export const getOwnerBookings = async (req, res) => {
+  const parkings = await Parking.find({ owner: req.user._id });
+  const parkingIds = parkings.map(p => p._id);
+  const bookings = await Booking.find({ parking: { $in: parkingIds } })
+    .populate('user', 'name email')
+    .populate('parking', 'title city')
+    .sort('-createdAt');
+
   res.json({ success: true, data: bookings });
 };
 

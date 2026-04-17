@@ -12,6 +12,10 @@ const bookingSchema = new mongoose.Schema(
       ref: 'Parking',
       required: true,
     },
+    plateNumber: {
+      type: String,
+      required: [true, 'Veuillez entrer le numéro de plaque d\'immatriculation'],
+    },
     startTime: {
       type: Date,
       required: true,
@@ -20,13 +24,16 @@ const bookingSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    checkinTime: Date,
+    checkoutTime: Date,
     totalPrice: {
       type: Number,
       required: true,
     },
+    actualPrice: Number,
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+      enum: ['pending', 'confirmed', 'completed', 'cancelled', 'in-progress'],
       default: 'pending',
     },
     paymentStatus: {

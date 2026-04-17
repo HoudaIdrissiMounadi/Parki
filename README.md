@@ -43,3 +43,11 @@ npm run dev
 - 📱 **Mobile-First :** Expérience utilisateur fluide type Airbnb sur tous les écrans.
 - 📊 **Dashboard Propriétaire :** Statistiques de revenus et gestion des réservations.
 - 📧 **Notifications :** Confirmations automatiques par email.
+
+## 📷 Intégration Caméra (Architecture)
+
+Parki supporte l'automatisation par détection de plaques (ANPR) :
+
+1. **Entrée :** Le système Raspberry Pi / OpenCV envoie un `POST /api/camera/entry` avec le numéro de plaque. L'API valide la réservation et enregistre l'heure d'entrée (`checkinTime`).
+2. **Sortie :** Lors du `POST /api/camera/exit`, l'API calcule la durée réelle, le prix final, et génère un PaymentIntent Stripe pour paiement à la sortie.
+3. **Sécurité :** Les requêtes caméra sont protégées par une clé API (`X-API-KEY`).
