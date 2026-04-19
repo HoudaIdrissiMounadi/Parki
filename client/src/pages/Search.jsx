@@ -3,7 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
-import { Search as SearchIcon, MapPin, Navigation, Inbox, Map as MapIcon, List as ListIcon } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Navigation, Inbox, Map as MapIcon, List as ListIcon, AlertCircle } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import ParkingCard from '../components/ParkingCard';
 import Skeleton from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
@@ -34,30 +35,42 @@ function ChangeView({ center }) {
 }
 
 const Search = () => {
+  const [searchParams] = useSearchParams();
   const [parkings, setParkings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [city, setCity] = useState('');
+  const [error, setError] = useState(null);
+  const [city, setCity] = useState(searchParams.get('city') || '');
   const [mapCenter, setMapCenter] = useState([33.5731, -7.5898]);
   const [highlightedId, setHighlightedId] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'map' for mobile
+  const [viewMode, setViewMode] = useState('list');
 
   const fetchParkings = async (searchCity = '') => {
     setLoading(true);
+    setError(null);
     try {
       const response = await axios.get(`${API_URL}/parkings`, { params: { city: searchCity } });
-      setParkings(response.data.data);
-      if (response.data.data.length > 0 && searchCity) {
-        const first = response.data.data[0];
-        setMapCenter([first.location.coordinates[1], first.location.coordinates[0]]);
+      console.log('[DEBUG] Search API Response:', response.data);
+
+      const data = response.data.data || response.data; // Handle both structures
+      setParkings(Array.isArray(data) ? data : []);
+
+      if (data.length > 0) {
+        const first = data[0];
+        if (first.location?.coordinates) {
+          setMapCenter([first.location.coordinates[1], first.location.coordinates[0]]);
+        }
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Erreur de connexion au serveur.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchParkings(); }, []);
+  useEffect(() => {
+    fetchParkings(city);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -73,10 +86,11 @@ const Search = () => {
         setLoading(true);
         try {
           const response = await axios.get(`${API_URL}/parkings/nearby`, { params: { lat: latitude, lng: longitude } });
-          setParkings(response.data.data);
+          const data = response.data.data || response.data;
+          setParkings(Array.isArray(data) ? data : []);
           setViewMode('map');
-        } catch (error) {
-          console.error(error);
+        } catch (err) {
+          console.error(err);
         } finally {
           setLoading(false);
         }
@@ -85,34 +99,37 @@ const Search = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] overflow-hidden relative">
-      {/* Sidebar - Hidden on mobile if map view is active */}
-      <div className={`w-full lg:w-[450px] flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${
-        viewMode === 'map' ? 'hidden lg:flex' : 'flex'
-      }`}>
-        <div className="p-4 border-b border-gray-100">
-          <form onSubmit={handleSearch} className="relative mb-4">
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] overflow-hidden relative font-inter">
+      {/* Sidebar */}
+      <div className={`w-full lg:w-[450px] flex flex-col bg-white border-r border-gray-100 transition-all duration-300 ${viewMode === 'map' ? 'hidden lg:flex' : 'flex'}`}>
+        <div className="p-6 border-b border-gray-50">
+          <form onSubmit={handleSearch} className="relative mb-6">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Casablanca, Rabat, Marrakech..."
-              className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-sm md:text-base"
+              placeholder="Chercher une ville..."
+              className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-gray-900 rounded-[20px] outline-none font-black text-gray-900 transition-all"
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
           </form>
-          <div className="flex gap-2">
-            <button onClick={locateMe} className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold active:scale-95 transition-transform">
-              <Navigation size={16} /> Me localiser
-            </button>
-          </div>
+          <button onClick={locateMe} className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gray-900 text-white rounded-2xl text-sm font-black active:scale-95 transition-transform">
+            <Navigation size={16} /> Me localiser
+          </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-gray-50/50">
-          {loading ? (
-            Array(3).fill(0).map((_, i) => <div key={i} className="space-y-3"><Skeleton className="h-48 w-full rounded-2xl" /><Skeleton className="h-4 w-3/4" /></div>)
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
+          {error ? (
+            <div className="p-6 bg-red-50 rounded-3xl flex flex-col items-center text-center gap-3">
+              <AlertCircle className="text-red-500" size={32} />
+              <p className="text-red-700 font-black">{error}</p>
+              <button onClick={() => fetchParkings(city)} className="text-red-500 underline font-bold">Réessayer</button>
+            </div>
+          ) : loading ? (
+            Array(3).fill(0).map((_, i) => <div key={i} className="space-y-3"><Skeleton className="h-56 w-full rounded-[32px]" /><Skeleton className="h-4 w-3/4" /></div>)
           ) : parkings.length > 0 ? (
             <>
-              <h2 className="text-lg font-black text-gray-900">{parkings.length} parkings trouvés</h2>
+              <h2 className="text-xl font-black text-gray-900 tracking-tighter">{parkings.length} parkings disponibles</h2>
               {parkings.map((p) => (
                 <div key={p._id} onMouseEnter={() => setHighlightedId(p._id)} onMouseLeave={() => setHighlightedId(null)}>
                   <ParkingCard parking={p} isHighlighted={highlightedId === p._id} />
@@ -121,31 +138,29 @@ const Search = () => {
             </>
           ) : (
             <EmptyState
-              title="Aucun résultat"
-              description="Nous n'avons pas trouvé de parking correspondant à votre recherche."
+              title="Aucun parking trouvé"
+              description="Essayez une autre ville ou retirez les filtres."
               icon={Inbox}
-              actionLabel="Voir tout"
+              actionLabel="Voir tous les parkings"
               onAction={() => { setCity(''); fetchParkings(''); }}
             />
           )}
         </div>
       </div>
 
-      {/* Map - Hidden on mobile if list view is active */}
-      <div className={`flex-1 relative bg-gray-200 z-10 ${
-        viewMode === 'list' ? 'hidden lg:block' : 'block'
-      }`}>
+      {/* Map */}
+      <div className={`flex-1 relative bg-gray-100 z-10 ${viewMode === 'list' ? 'hidden lg:block' : 'block'}`}>
         <MapContainer center={mapCenter} zoom={13} className="h-full w-full">
           <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <ChangeView center={mapCenter} />
           {parkings.map((p) => (
             <Marker key={p._id} position={[p.location.coordinates[1], p.location.coordinates[0]]} icon={customMarker(p.status)}>
               <Popup>
-                <div className="w-48 overflow-hidden rounded-xl">
-                  <img src={p.images[0]} alt="" className="w-full h-24 object-cover" />
-                  <div className="p-3 bg-white">
-                    <h4 className="font-bold text-gray-900 truncate">{p.title}</h4>
-                    <p className="text-primary font-black mt-1">{p.pricePerHour} MAD/h</p>
+                <div className="w-56 overflow-hidden rounded-[20px] shadow-2xl">
+                  <img src={p.images[0]} alt="" className="w-full h-32 object-cover" />
+                  <div className="p-4 bg-white">
+                    <h4 className="font-black text-gray-900 truncate mb-1">{p.title}</h4>
+                    <p className="text-primary font-black text-lg">{p.pricePerHour} MAD<span className="text-[10px] text-gray-400 font-bold tracking-normal uppercase ml-1">/h</span></p>
                   </div>
                 </div>
               </Popup>
@@ -154,11 +169,11 @@ const Search = () => {
         </MapContainer>
       </div>
 
-      {/* Mobile Toggle Button */}
-      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
+      {/* Mobile view toggle */}
+      <div className="lg:hidden fixed bottom-8 left-1/2 -translate-x-1/2 z-[1000]">
         <button
           onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
-          className="bg-gray-900 text-white px-6 py-3.5 rounded-full font-black shadow-2xl flex items-center gap-2 active:scale-95 transition-transform"
+          className="bg-gray-900 text-white px-8 py-4 rounded-full font-black shadow-[0_10px_30px_rgba(0,0,0,0.3)] flex items-center gap-3 active:scale-95 transition-transform"
         >
           {viewMode === 'list' ? <><MapIcon size={20} /> Carte</> : <><ListIcon size={20} /> Liste</>}
         </button>
