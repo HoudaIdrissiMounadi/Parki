@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
-import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { LogIn, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -22,38 +23,97 @@ const Login = () => {
     }
   };
 
+  const Feature = ({ text }) => (
+    <div className="flex items-center gap-3 text-[#374151] font-semibold text-[14px]">
+      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+        <CheckCircle2 size={12} className="text-white" />
+      </div>
+      {text}
+    </div>
+  );
+
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 bg-gray-50 font-inter">
-      <div className="w-full max-w-md p-10 bg-white shadow-xl rounded-[40px] border border-gray-100">
-        <div className="flex flex-col items-center mb-10 text-center">
-          <div className="p-4 mb-4 bg-gray-900 rounded-[20px] text-white -rotate-3">
-            <LogIn size={32} />
+    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-white font-inter overflow-hidden">
+      {/* Left Column */}
+      <div className="hidden md:flex flex-col justify-between p-12 bg-[#faf9ff] relative overflow-hidden border-r border-border">
+        <div className="blob blob-violet w-[300px] h-[300px] -top-10 -right-10 opacity-30"></div>
+        <div className="blob blob-rose w-[200px] h-[200px] -bottom-10 -left-10 opacity-20"></div>
+
+        <Link to="/" className="text-2xl font-[900] tracking-tight font-display relative z-10">
+          Park<span className="text-primary">i</span>
+        </Link>
+
+        <div className="space-y-12 relative z-10">
+          <div className="space-y-4">
+            <h2 className="text-[32px] font-display font-[800] text-text leading-tight tracking-tight">
+              La façon la plus simple <br /> de se garer.
+            </h2>
+            <p className="text-muted text-[14px] font-medium max-w-xs">
+              Évitez les amendes et les tracas de stationnement partout au Maroc.
+            </p>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tighter">Bon retour !</h1>
-          <p className="text-gray-400 font-bold mt-1 uppercase text-[10px] tracking-widest">Gérez vos stationnements</p>
+
+          <div className="space-y-6">
+            <Feature text="500+ parkings vérifiés" />
+            <Feature text="Paiement 100% sécurisé" />
+            <Feature text="Entrée sans ticket papier" />
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1 tracking-widest">Email</label>
-            <input type="email" required className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-gray-900 rounded-[20px] outline-none font-black text-gray-900 transition-all" placeholder="votre@email.com" value={email} onChange={e => setEmail(e.target.value)} />
+        <div className="text-[11px] text-muted font-bold uppercase tracking-widest relative z-10">
+          © 2026 Parki Technologies
+        </div>
+      </div>
+
+      {/* Right Column */}
+      <div className="flex items-center justify-center p-8 md:p-16 bg-white">
+        <div className="w-full max-w-sm space-y-10">
+          <div className="md:hidden mb-12">
+             <Link to="/" className="text-2xl font-black font-display">Park<span className="text-primary">i</span></Link>
           </div>
-          <div className="relative">
-            <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1 tracking-widest">Mot de passe</label>
-            <input type={showPassword ? "text" : "password"} required className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-gray-900 rounded-[20px] outline-none font-black text-gray-900 transition-all" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-[44px] text-gray-400 hover:text-gray-900">
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+
+          <div className="space-y-2">
+            <h1 className="text-3xl font-display font-[800] text-text tracking-tight">Bon retour !</h1>
+            <p className="text-muted text-[14px] font-medium">Entrez vos identifiants pour continuer.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold uppercase text-muted tracking-[0.08em] ml-1">Email</label>
+              <input
+                type="email"
+                required
+                className="w-full px-4 py-3.5 bg-[#f9fafb] border border-border focus:border-primary focus:bg-[#faf9ff] rounded-[10px] outline-none font-semibold text-text transition-all"
+                placeholder="votre@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2 relative">
+              <label className="block text-[10px] font-bold uppercase text-muted tracking-[0.08em] ml-1">Mot de passe</label>
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                className="w-full px-4 py-3.5 bg-[#f9fafb] border border-border focus:border-primary focus:bg-[#faf9ff] rounded-[10px] outline-none font-semibold text-text transition-all"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-[38px] text-muted hover:text-text transition-colors">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            <button type="submit" disabled={isLoading} className="w-full py-4 bg-gradient-to-r from-primary to-[#7c3aed] text-white font-bold rounded-[10px] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
+              {isLoading ? 'Connexion...' : 'Se connecter'}
             </button>
-          </div>
+          </form>
 
-          <button type="submit" disabled={isLoading} className="w-full py-5 bg-gray-900 text-white font-black text-lg rounded-[20px] hover:bg-black transition-all shadow-[0_10px_30px_rgba(0,0,0,0.15)] active:scale-95 disabled:opacity-50">
-            {isLoading ? 'Connexion...' : 'Se connecter'}
-          </button>
-        </form>
-
-        <p className="mt-10 text-center text-gray-400 font-bold text-sm">
-          Pas de compte ? <Link to="/register" className="text-gray-900 font-black hover:underline">Créer un compte</Link>
-        </p>
+          <p className="text-center text-[13px] text-muted font-medium">
+            Pas encore de compte ? <Link to="/register" className="text-primary font-bold hover:underline underline-offset-4">Créer un compte</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

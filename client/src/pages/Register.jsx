@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
-import { UserPlus, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Register = () => {
   const [searchParams] = useSearchParams();
@@ -29,9 +30,7 @@ const Register = () => {
 
   const handlePhoneChange = (e) => {
     const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 9) {
-      setPhoneSuffix(value);
-    }
+    if (value.length <= 9) setPhoneSuffix(value);
   };
 
   const handleSubmit = async (e) => {
@@ -49,60 +48,98 @@ const Register = () => {
     }
   };
 
+  const Feature = ({ text }) => (
+    <div className="flex items-center gap-3 text-[#374151] font-semibold text-[14px]">
+      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+        <CheckCircle2 size={12} className="text-white" />
+      </div>
+      {text}
+    </div>
+  );
+
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 bg-gray-50 py-12 font-inter">
-      <div className="w-full max-w-md p-10 bg-white shadow-xl rounded-[40px] border border-gray-100">
-        <div className="flex flex-col items-center mb-10 text-center">
-          <div className="p-4 mb-4 bg-gray-900 rounded-[20px] text-white rotate-3">
-            <UserPlus size={32} />
+    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-white font-inter overflow-hidden">
+      {/* Left Column */}
+      <div className="hidden md:flex flex-col justify-between p-12 bg-[#faf9ff] relative overflow-hidden border-r border-border">
+        <div className="blob blob-violet w-[300px] h-[300px] -top-10 -right-10 opacity-30"></div>
+        <div className="blob blob-rose w-[200px] h-[200px] -bottom-10 -left-10 opacity-20"></div>
+
+        <Link to="/" className="text-2xl font-[900] tracking-tight font-display relative z-10">
+          Park<span className="text-primary">i</span>
+        </Link>
+
+        <div className="space-y-12 relative z-10">
+          <div className="space-y-4">
+            <h2 className="text-[32px] font-display font-[800] text-text leading-tight tracking-tight">
+              Rejoignez le futur du <br /> stationnement.
+            </h2>
+            <p className="text-muted text-[14px] font-medium max-w-xs">
+              Devenez membre de la communauté Parki et profitez d'une expérience fluide.
+            </p>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tighter">Créer un compte</h1>
-          <p className="text-gray-400 font-bold mt-1 uppercase text-[10px] tracking-widest">Rejoignez la communauté Parki</p>
+          <div className="space-y-6">
+            <Feature text="Accès à 500+ emplacements" />
+            <Feature text="Gestion simple des revenus" />
+            <Feature text="Paiement automatique" />
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1 tracking-widest">Nom complet</label>
-            <input type="text" name="name" required className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-gray-900 rounded-[20px] outline-none font-black text-gray-900 transition-all" placeholder="Ahmed Alaoui" value={formData.name} onChange={handleChange} />
+        <div className="text-[11px] text-muted font-bold uppercase tracking-widest relative z-10">© 2026 Parki Technologies</div>
+      </div>
+
+      {/* Right Column */}
+      <div className="flex items-center justify-center p-8 md:p-12 bg-white">
+        <div className="w-full max-w-md space-y-8">
+          <div className="space-y-2 text-center md:text-left">
+            <h1 className="text-3xl font-display font-[800] text-text tracking-tight">Créer un compte</h1>
+            <p className="text-muted text-[14px] font-medium italic">Commencez votre voyage avec Parki aujourd'hui.</p>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1 tracking-widest">Email</label>
-            <input type="email" name="email" required className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-gray-900 rounded-[20px] outline-none font-black text-gray-900 transition-all" placeholder="votre@email.com" value={formData.email} onChange={handleChange} />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1 tracking-widest">Téléphone (Maroc)</label>
-            <div className="flex group transition-all">
-              <div className="flex items-center bg-gray-200 px-5 border-2 border-transparent rounded-l-[20px] text-gray-600 font-black text-sm">+212</div>
-              <input type="tel" required className="flex-1 px-5 py-4 bg-gray-50 border-2 border-transparent border-l-0 focus:border-gray-900 rounded-r-[20px] outline-none font-black text-gray-900 transition-all" placeholder="600000000" value={phoneSuffix} onChange={handlePhoneChange} />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold uppercase text-muted tracking-widest ml-1">Nom complet</label>
+                <input type="text" name="name" required className="w-full px-4 py-3 bg-[#f9fafb] border border-border focus:border-primary focus:bg-[#faf9ff] rounded-[10px] outline-none font-semibold text-text" placeholder="Ahmed Alaoui" value={formData.name} onChange={handleChange} />
+              </div>
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold uppercase text-muted tracking-widest ml-1">Je suis un :</label>
+                <select name="role" className="w-full px-4 py-3 bg-[#f9fafb] border border-border focus:border-primary rounded-[10px] outline-none font-semibold text-text appearance-none cursor-pointer" value={formData.role} onChange={handleChange}>
+                  <option value="driver">Conducteur</option>
+                  <option value="owner">Propriétaire</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <div className="relative">
-            <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1 tracking-widest">Mot de passe</label>
-            <input type={showPassword ? "text" : "password"} name="password" required className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-gray-900 rounded-[20px] outline-none font-black text-gray-900 transition-all" placeholder="••••••••" value={formData.password} onChange={handleChange} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-[44px] text-gray-400 hover:text-gray-900">
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold uppercase text-muted tracking-widest ml-1">Email</label>
+              <input type="email" name="email" required className="w-full px-4 py-3 bg-[#f9fafb] border border-border focus:border-primary focus:bg-[#faf9ff] rounded-[10px] outline-none font-semibold text-text" placeholder="votre@email.com" value={formData.email} onChange={handleChange} />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold uppercase text-muted tracking-widest ml-1">Téléphone (Maroc)</label>
+              <div className="flex group overflow-hidden border border-border rounded-[10px]">
+                <div className="flex items-center bg-gray-100 px-4 text-gray-500 font-bold text-sm border-r border-border">+212</div>
+                <input type="tel" required className="flex-1 px-4 py-3 bg-[#f9fafb] focus:bg-[#faf9ff] outline-none font-semibold text-text" placeholder="600000000" value={phoneSuffix} onChange={handlePhoneChange} />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 relative">
+              <label className="block text-[10px] font-bold uppercase text-muted tracking-widest ml-1">Mot de passe</label>
+              <input type={showPassword ? "text" : "password"} name="password" required className="w-full px-4 py-3 bg-[#f9fafb] border border-border focus:border-primary focus:bg-[#faf9ff] rounded-[10px] outline-none font-semibold text-text" placeholder="••••••••" value={formData.password} onChange={handleChange} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-[36px] text-muted">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            <button type="submit" disabled={isLoading} className="w-full py-4 bg-gradient-to-r from-primary to-[#7c3aed] text-white font-bold rounded-[10px] shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50">
+              {isLoading ? 'Création...' : "S'inscrire sur Parki"}
             </button>
-          </div>
+          </form>
 
-          <div>
-            <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 ml-1 tracking-widest">Je suis un :</label>
-            <select name="role" className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-gray-900 rounded-[20px] outline-none font-black text-gray-900 transition-all appearance-none cursor-pointer" value={formData.role} onChange={handleChange}>
-              <option value="driver">Conducteur</option>
-              <option value="owner">Propriétaire</option>
-            </select>
-          </div>
-
-          <button type="submit" disabled={isLoading} className="w-full py-5 mt-4 bg-gray-900 text-white font-black text-lg rounded-[20px] hover:bg-black transition-all shadow-[0_10px_30px_rgba(0,0,0,0.15)] active:scale-95 disabled:opacity-50">
-            {isLoading ? 'Création...' : "S'inscrire"}
-          </button>
-        </form>
-
-        <p className="mt-10 text-center text-gray-400 font-bold text-sm">
-          Déjà un compte ? <Link to="/login" className="text-gray-900 font-black hover:underline">Se connecter</Link>
-        </p>
+          <p className="text-center text-[13px] text-muted font-medium">
+            Déjà un compte ? <Link to="/login" className="text-primary font-bold hover:underline underline-offset-4">Se connecter</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
